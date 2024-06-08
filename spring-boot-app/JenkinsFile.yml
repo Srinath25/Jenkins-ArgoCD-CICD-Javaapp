@@ -28,21 +28,21 @@ pipeline {
       }
     }
     stage('Build and Push Docker Image') {
-    environment {
+      environment {
         DOCKER_IMAGE = "srinathravi/jenkins-cicd-argocd:${BUILD_NUMBER}"
         REGISTRY_CREDENTIALS = credentials('docker-cred')
-    }
-    steps {
+      }
+      steps {
         script {
             sh '''
-                cd spring-boot-app && 
+                cd spring-boot-app &&
                 docker build -t "${DOCKER_IMAGE}" . &&
                 docker login -u <username> -p <password> &&
                 docker push "${DOCKER_IMAGE}"
             '''
-        }
+          }
+       }
     }
-}
     stage('Update Deployment File') {
         environment {
             GIT_REPO_NAME = "Jenkins-ArgoCD-CICD-Javaapp"
