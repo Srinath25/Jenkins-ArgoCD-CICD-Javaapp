@@ -23,7 +23,7 @@ pipeline {
       }
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-          sh 'cd spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
+          sh "cd spring-boot-app && mvn sonar:sonar -Dsonar.login=${SONAR_AUTH_TOKEN} -Dsonar.host.url=${SONAR_URL}"
         }
       }
     }
@@ -35,10 +35,11 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
           script {
-            sh "cd spring-boot-app && docker build -t "${DOCKER_IMAGE}" -f spring-boot-app/Dockerfile ."
+            sh "cd spring-boot-app && docker build -t ${DOCKER_IMAGE} -f spring-boot-app/Dockerfile ."
             def dockerImage = docker.image("${DOCKER_IMAGE}")
             docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
                 dockerImage.push()
+            }
           }
         }
       }
@@ -50,7 +51,7 @@ pipeline {
       }
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-          sh '''
+          sh """
             git config user.email "sritharun256@gmail.com"
             git config user.name "Srinath25"
             BUILD_NUMBER=${BUILD_NUMBER}
@@ -58,10 +59,9 @@ pipeline {
             git add spring-boot-app-manifests/deployment.yml
             git commit -m "Update deployment image to version ${BUILD_NUMBER}"
             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-          '''
+          """
         }
       }
     }
   }
-}
 }
