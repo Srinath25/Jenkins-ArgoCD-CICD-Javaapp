@@ -22,7 +22,7 @@ pipeline {
         SONAR_URL = "http://54.151.82.244:9000"
       }
       steps {
-        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+        withCredentials([string(credentialsId: 'onarqube', variable: 'SONAR_AUTH_TOKEN')]) {
           sh 'cd spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
         }
       }
@@ -33,34 +33,36 @@ pipeline {
         REGISTRY_CREDENTIALS = credentials('docker-cred')
       }
       steps {
-        script {
+        withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+          script {
             sh """
-                cd spring-boot-app &&
-                docker build -t "${DOCKER_IMAGE}" . &&
-                docker login -u <username> -p <password> &&
-                docker push "${DOCKER_IMAGE}"
+              cd spring-boot-app &&
+              docker build -t "${DOCKER_IMAGE}". &&
+              docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} &&
+              docker push "${DOCKER_IMAGE}"
             """
+          }
         }
       }
     }
     stage('Update Deployment File') {
-        environment {
-            GIT_REPO_NAME = "Jenkins-ArgoCD-CICD-Javaapp"
-            GIT_USER_NAME = "Srinath25"
+      environment {
+        GIT_REPO_NAME = "Jenkins-ArgoCD-CICD-Javaapp"
+        GIT_USER_NAME = "Srinath25"
+      }
+      steps {
+        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+          sh '''
+            git config user.email "sritharun256@gmail.com"
+            git config user.name "Srinath25"
+            BUILD_NUMBER=${BUILD_NUMBER}
+            sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-boot-app-manifests/deployment.yml
+            git add spring-boot-app-manifests/deployment.yml
+            git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+          '''
         }
-        steps {
-            withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                sh '''
-                    git config user.email "sritharun256@gmail.com"
-                    git config user.name "Srinath25"
-                    BUILD_NUMBER=${BUILD_NUMBER}
-                    sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-boot-app-manifests/deployment.yml
-                    git add spring-boot-app-manifests/deployment.yml
-                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
-                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                '''
-            }
-        }
+      }
     }
   }
 }
