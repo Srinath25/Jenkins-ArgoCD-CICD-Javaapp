@@ -34,14 +34,14 @@ pipeline {
       }
       steps {
         script {
-            sh '''
+            sh """
                 cd spring-boot-app &&
                 docker build -t "${DOCKER_IMAGE}" . &&
                 docker login -u <username> -p <password> &&
                 docker push "${DOCKER_IMAGE}"
-            '''
-          }
-       }
+            """
+        }
+      }
     }
     stage('Update Deployment File') {
         environment {
