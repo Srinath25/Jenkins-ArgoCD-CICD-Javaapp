@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: srinathravi/jenkins-cicd-argocd:replaceImageTag
+        image: srinathravi/jenkins-cicd-argocd:8
         ports:
         - containerPort: 8080
