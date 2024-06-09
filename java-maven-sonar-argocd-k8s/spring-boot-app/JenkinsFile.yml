@@ -30,7 +30,7 @@ pipeline {
     stage('Build and Push Docker Image') {
       environment {
         DOCKER_IMAGE = "srinathravi/ultimate-cicd:${BUILD_NUMBER}"
-        DOCKERFILE_LOCATION = "java-maven-sonar-argocd-k8s/spring-boot-app/Dockerfile"
+        DOCKERFILE_LOCATION = "java-maven-sonar-argocd-k8s/spring-boot-app/Dockerfile.yml"
         REGISTRY_CREDENTIALS = credentials('docker-cred')
       }
       steps {
