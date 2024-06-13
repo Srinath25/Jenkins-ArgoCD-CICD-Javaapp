@@ -54,7 +54,6 @@ pipeline {
                     git config user.email "sritharun256@gmail.com"
                     git config user.name "Srinath25"
                     BUILD_NUMBER=${BUILD_NUMBER}
-                    git checkout -b main
                     sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" java-maven-sonar-argocd-k8s/spring-boot-app-manifests/deployment.yml
                     git add .
                     git commit -m "Update deployment image to version ${BUILD_NUMBER}"
